@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
     user: "root",
 
     // Your password
-    password: "root",
+    password: "joe",
     database: "bamazon"
 });
 
@@ -63,13 +63,42 @@ function orderSelect() {
         connection.query("SELECT * FROM products;", function (err, results) {
             if (err) console.log(err);
             // get the information of the chosen item
+            // console.log(results);
             var chosenItem;
             for (var i = 0; i < results.length; i++) {
                 if (results[i].item_id === answer.chosenNum) {
                     chosenItem = results[i];
                 }
+            }    if (chosenItem.stock_qty >= parseInt(answer.amount)) {
+                //    8. However, if your store _does_ have enough of the product, you should fulfill the customer's order.
+                //    * This means updating the SQL database to reflect the remaining quantity.
+                //    * Once the update goes through, show the customer the total cost of their purchase.
+                // bid was high enough, so update db, let the user know, and start over
+                connection.query(
+                    "UPDATE products SET ? WHERE ?",
+                    [
+                        {
+                            stock_qty: chosenItem.stock_qty - 1
+                        },
+                        {
+                            item_id: chosenItem.item_id
+                        }
+                    ],
+                    function (error) {
+                        if (error) throw err;
+                        console.log("Bid placed successfully!");
+                        connection.end();
+                    }
+                )
+            }
+            else {
+                //    * If not, the app should log a phrase like `Insufficient quantity!`, and then prevent the order from going through.
+                // bid wasn't high enough, so apologize and start over
+                console.log("Insufficient stock available. Please try again...");
+                showAll();
             }
         })
+
     });
     // inquirer.prompt(questions).then(answers => {
     //     console.log('\nOrder receipt:');
@@ -77,35 +106,4 @@ function orderSelect() {
     // })
 
     // 7. Once the customer has placed the order, your application should check if your store has enough of the product to meet the customer's request.
-
-    function fillOrder() {
-        if (chosenItem.stock_qty >= parseInt(answer.amount)) {
-            //    8. However, if your store _does_ have enough of the product, you should fulfill the customer's order.
-            //    * This means updating the SQL database to reflect the remaining quantity.
-            //    * Once the update goes through, show the customer the total cost of their purchase.
-            // bid was high enough, so update db, let the user know, and start over
-            connection.query(
-                "UPDATE products SET ? WHERE ?",
-                [
-                    {
-                        stock_qty: stock_qty - 1
-                    },
-                    {
-                        item_id: chosenItem.item_id
-                    }
-                ],
-                function (error) {
-                    if (error) throw err;
-                    console.log("Bid placed successfully!");
-                    start();
-                }
-            )
-        }
-        else {
-            //    * If not, the app should log a phrase like `Insufficient quantity!`, and then prevent the order from going through.
-            // bid wasn't high enough, so apologize and start over
-            console.log("Insufficient stock available. Please try again...");
-            showAll();
-        }
-    }
 };

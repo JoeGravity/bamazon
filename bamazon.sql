@@ -13,9 +13,9 @@ CREATE TABLE products (
   product_name VARCHAR(255) NOT NULL,
   dept_name VARCHAR(30),
   price DECIMAL(10,2),
-  stock_qty INTEGER (6)
+  stock_qty INTEGER (6),
   -- Sets id as this table's primary key which means all data contained within it will be unique --
-  PRIMARY KEY (id)
+  PRIMARY KEY (item_id)
 );
 
 -- Creates new rows containing data in all named columns --
