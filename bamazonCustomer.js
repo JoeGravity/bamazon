@@ -69,7 +69,7 @@ function orderSelect() {
                 if (results[i].item_id === answer.chosenNum) {
                     chosenItem = results[i];
                 }
-            }    if (chosenItem.stock_qty >= parseInt(answer.amount)) {
+            } if (chosenItem.stock_qty >= parseInt(answer.amount)) {
                 //    8. However, if your store _does_ have enough of the product, you should fulfill the customer's order.
                 //    * This means updating the SQL database to reflect the remaining quantity.
                 //    * Once the update goes through, show the customer the total cost of their purchase.
@@ -86,7 +86,8 @@ function orderSelect() {
                     ],
                     function (error) {
                         if (error) throw err;
-                        console.log("Bid placed successfully!");
+                        console.log("Congratulations on your Bamazon purchase!");
+                        displayCost(chosenItem.price, answer.amount);
                         connection.end();
                     }
                 )
@@ -98,12 +99,10 @@ function orderSelect() {
                 showAll();
             }
         })
-
     });
-    // inquirer.prompt(questions).then(answers => {
-    //     console.log('\nOrder receipt:');
-    //     console.log(JSON.stringify(answers, null, '  '));
-    // })
-
-    // 7. Once the customer has placed the order, your application should check if your store has enough of the product to meet the customer's request.
 };
+
+function displayCost(price, amount) {
+    var totalPaid = price * parseInt(amount);
+    console.log("You paid $" + totalPaid.toFixed(2));
+}
