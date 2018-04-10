@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
     user: "root",
 
     // Your password
-    password: "root",
+    password: "joe",
     database: "bamazon"
 });
 
@@ -56,8 +56,8 @@ inquirer
     ])
     .then(answers => {
         console.log(JSON.stringify(answers, null, '  '));
-
-        switch (answers) {
+console.log(answers.menu)
+        switch (answers.menu) {
             case "view low inventory":
                 lowQty();
                 break;
@@ -74,7 +74,7 @@ inquirer
     });
 
 
-function lowQty(answers) {
+function lowQty() {
     console.log("ITEMS LOW ON STOCK")
     // inquirer.prompt(questions).then(function (answer) {
     connection.query("SELECT * FROM products;", function (err, res) {
