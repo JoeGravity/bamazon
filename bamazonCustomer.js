@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
     user: "root",
 
     // Your password
-    password: "joe",
+    password: "root",
     database: "bamazon"
 });
 
@@ -23,8 +23,11 @@ connection.connect(function (err) {
 function showAll() {
     connection.query("SELECT * FROM products;", function (err, res) {
         if (err) console.log(err);
+        // print list headers
+        console.log("| No.| Price | Department | Product Description |");
+        // print info from each row
         for (var i = 0; i < res.length; i++) {
-            console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].dept_name + " | $" + res[i].price);
+            console.log("| " + res[i].item_id + " | $" + res[i].price.toFixed(2) + " | " + res[i].dept_name + " | " + res[i].product_name + " |");
         }
         console.log("-----------------------------------");
         orderSelect();
@@ -62,23 +65,24 @@ function orderSelect() {
     inquirer.prompt(questions).then(function (answer) {
         connection.query("SELECT * FROM products;", function (err, results) {
             if (err) console.log(err);
+            // get quantity purchased
+            var buyQty = parseInt(answer.amount)
             // get the information of the chosen item
-            // console.log(results);
             var chosenItem;
             for (var i = 0; i < results.length; i++) {
                 if (results[i].item_id === answer.chosenNum) {
                     chosenItem = results[i];
                 }
-            } if (chosenItem.stock_qty >= parseInt(answer.amount)) {
+            } if (chosenItem.stock_qty >= buyQty) {
                 //    8. However, if your store _does_ have enough of the product, you should fulfill the customer's order.
                 //    * This means updating the SQL database to reflect the remaining quantity.
                 //    * Once the update goes through, show the customer the total cost of their purchase.
-                // bid was high enough, so update db, let the user know, and start over
+                // bid was high enough, so update db, let the user know, and [start over] disconnect.
                 connection.query(
                     "UPDATE products SET ? WHERE ?",
                     [
                         {
-                            stock_qty: chosenItem.stock_qty - 1
+                            stock_qty: chosenItem.stock_qty - buyQty
                         },
                         {
                             item_id: chosenItem.item_id
@@ -105,4 +109,4 @@ function orderSelect() {
 function displayCost(price, amount) {
     var totalPaid = price * parseInt(amount);
     console.log("You paid $" + totalPaid.toFixed(2));
-}
+};
