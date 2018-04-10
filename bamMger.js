@@ -56,15 +56,15 @@ inquirer
     ])
     .then(answers => {
         console.log(JSON.stringify(answers, null, '  '));
-console.log(answers.menu)
+        console.log(answers.menu)
         switch (answers.menu) {
             case "view low inventory":
                 lowQty();
                 break;
-            case [1]:
+            case "add to inventory":
                 fillQty();
                 break;
-            case "Add New Product":
+            case "add new product":
                 showAll();
                 break;
             default: "View Products for Sale";
@@ -72,8 +72,7 @@ console.log(answers.menu)
         };
 
     });
-
-
+//   * If a manager selects `View Low Inventory`, then it should list all items with an inventory count lower than five.
 function lowQty() {
     console.log("ITEMS LOW ON STOCK")
     // inquirer.prompt(questions).then(function (answer) {
@@ -91,7 +90,9 @@ function lowQty() {
     });
 };
 
-function fillQty(answers) {
+//   * If a manager selects `Add to Inventory`, your app should display a prompt that will let the manager "add more" of any item currently in the store.
+
+function fillQty() {
     var questions = [
         {
             type: 'input',
@@ -115,37 +116,35 @@ function fillQty(answers) {
         },
     ]
     inquirer.prompt(questions).then(function (answer) {
-        var addQty = parseInt(answer.amount)
-        var chosenItem;
-        for (var i = 0; i < results.length; i++) {
-            if (results[i].item_id === answer.chosenNum) {
-                chosenItem = results[i];
-            }
-            connection.query(
-                "UPDATE products SET ? WHERE ?",
-                [
-                    {
-                        stock_qty: chosenItem.stock_qty + addQty
-                    },
-                    {
-                        item_id: chosenItem.item_id
-                    }
-                ],
-                function (error) {
-                    if (error) throw err;
-                    console.log("Items have been refilled");
-                    connection.end();
+        connection.query("SELECT * FROM products;", function (err, res) {
+            if (err) console.log(err);
+            var addQty = parseInt(answer.amount)
+            var chosenItem;
+            for (var i = 0; i < res.length; i++) {
+                if (res[i].item_id == answer.chosenNum) {
+                    chosenItem = res[i];
                 }
-            )
-        }
+            } 
+            // if (chosenItem.stock_qty >= buyQty) {
+                connection.query(
+                    "UPDATE products SET ? WHERE ?",
+                    [
+                        {
+                            stock_qty: chosenItem.stock_qty + addQty
+                        },
+                        {
+                            item_id: chosenItem.item_id
+                        }
+                    ],
+                    function (error) {
+                        if (error) throw err;
+                        console.log("Items have been refilled");
+                        connection.end();
+                    }
+                )
+            }
+        )
     })
 };
-
-
-
-
-//   * If a manager selects `View Low Inventory`, then it should list all items with an inventory count lower than five.
-
-//   * If a manager selects `Add to Inventory`, your app should display a prompt that will let the manager "add more" of any item currently in the store.
 
 //   * If a manager selects `Add New Product`, it should allow the manager to add a completely new product to the store.
